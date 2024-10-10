@@ -1,0 +1,24 @@
+﻿
+int main()
+{
+	// sum = 17.4
+	cout << sum(2, 1.8, 3.8, 4, 5.8) << endl;
+	// sum = 17.4
+	cout << sum(1.8, 2, 3.8, 4, 5.8) << endl;
+	
+	// min = 1.1
+	cout << min(2.2, 1.1, 4, 4, 58) << endl;
+	// min = -58
+	cout << min(2.2, 1.1, 4, 4, -58) << endl;
+
+	// Test #1: OK
+	my_printf("Simple check\nNew line\nAgain new line\n");
+	// Test #2: Invalid number of arguments
+	my_printf(" text %s, integral value %d than something %d\n", "SUCCESSFULLY", 85);
+	// Test #3: Incorrect type / Invalid number of arguments
+	my_printf("Some text %s, some floating point number %f again something %k\n", "45", 89.7, 56);
+	// Test #4: OK
+	my_printf("Some text %s, some floating point number %f again something %d\n", "45", 89.7, 56);
+
+	return 0;
+}
