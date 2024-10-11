@@ -3,6 +3,8 @@
 
 // Овде написати следећу функцију:
 constexpr int fibo(int n) {
+	// moze, ali svakako crkava pri kompilaciji ako je prevelik broj
+	assert(n < 100);
 	if(n == 0 || n == 1) return n;
 	return fibo(n - 1) + fibo(n - 2);
 }
