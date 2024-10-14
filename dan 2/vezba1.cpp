@@ -1,9 +1,22 @@
 ﻿#include "MyBigInt.h"
 
 #include <iostream>
+#include <string>
+#include <vector>
 
-MyBigInt operator+(const MyBigInt& lhs, const MyBigInt& rhs)
-{
+MyBigInt operator ""_mbi (const char* sz) {
+	std::string s(sz);
+	MyBigInt mbi;
+	mbi.size = s.length();
+	mbi.digits = new int_least8_t[mbi.size];
+	for(int i = mbi.size - 1; i >= 0; i--) {
+		mbi.digits[mbi.size - 1 - i] = s[i] - '0';
+	}
+
+	return mbi;
+}
+
+MyBigInt operator+(const MyBigInt& lhs, const MyBigInt& rhs) {
 	MyBigInt ret;
 	const MyBigInt& longerArg = (lhs.size < rhs.size) ? rhs : lhs;
 	const MyBigInt& shorterArg = (lhs.size < rhs.size) ? lhs : rhs;
@@ -25,17 +38,105 @@ MyBigInt operator+(const MyBigInt& lhs, const MyBigInt& rhs)
 		ret.size = longerArg.size + 1;
 	}
 	ret.digits[longerArg.size] = reminder;
+
 	return ret;
 }
 
+std::ostream& operator << (std::ostream& out, const MyBigInt& mbi) {
+	for(int i = mbi.size - 1; i >= 0; i--) {
+		out << static_cast<int>(mbi.digits[i]);
+	}
+
+	return out;
+}
+
+bool operator == (const MyBigInt& lhs, const MyBigInt& rhs) {
+	if(lhs.size != rhs.size) return false;
+	for(int i = 0; i < lhs.size; i++) {
+		if(lhs.digits[i] != rhs.digits[i]) return false;
+	}
+
+	return true;
+}
+
+bool operator !=(const MyBigInt& lhs, const MyBigInt& rhs) {
+	return !(lhs == rhs);
+}
+
+
+MyBigInt::MyBigInt(unsigned long long init) {
+	std::string s = std::to_string(init);
+	size = s.length();
+	digits = new int_least8_t[size];
+
+	for(int i = size - 1; i >= 0; i--) {
+		digits[size - 1 - i] = s[i] - '0';
+	}
+}
+
+MyBigInt::MyBigInt(const MyBigInt& mbi_s) {
+	size = mbi_s.size;
+	if(digits) delete [] digits;
+	digits = new int_least8_t[size];
+	for(int i = 0; i < size; i++) {
+		digits[i] = mbi_s.digits[i];
+	}
+
+	// std::cout << "Calling copy\n";
+}
+
+MyBigInt::MyBigInt(MyBigInt&& mbi_s) {
+	size = mbi_s.size;
+	if(digits) delete [] digits;
+	digits = mbi_s.digits;
+	mbi_s.digits = nullptr;
+	// std::cout << "Calling move\n";
+}
+
+MyBigInt& MyBigInt::operator= (const MyBigInt& mbi_s) {
+	size = mbi_s.size;
+	if(digits) delete [] digits;
+	digits = new int_least8_t[size];
+	for(int i = 0; i < size; i++) {
+		digits[i] = mbi_s.digits[i];
+	}
+
+	// std::cout << "Calling copy assign\n";
+
+	return *this;
+}
+
+MyBigInt& MyBigInt::operator= (MyBigInt&& mbi_s) {
+	size = mbi_s.size;
+	if(digits) delete [] digits;
+	digits = mbi_s.digits;
+	mbi_s.digits = nullptr;
+	// std::cout << "Calling move assign\n";
+
+	return *this;
+}
+
+MyBigInt::~MyBigInt() {
+	if(digits) delete [] digits;
+}
 
 // Овде написати следећу функцију:
-// MyBigInt fibo(int n);
+MyBigInt fibo(int n) {
+	if(n < 2) return n;
+	MyBigInt f;
+	std::vector<MyBigInt> mb_vec(n + 1);
+	mb_vec[0] = 0;
+	mb_vec[1] = 1;
+	for(int i = 2; i <= n; i++) {
+		mb_vec[i] = mb_vec[i - 1] + mb_vec[i - 2];		
+	}
+
+	return mb_vec[n];
+}
 
 
-int main()
-{
-	MyBigInt k{123};
+int main() {
+	MyBigInt k = 123;
 	std::cout << k << std::endl;
 	k = fibo(9);
 	std::cout << k << std::endl;
