@@ -76,7 +76,8 @@ MyBigInt::MyBigInt(unsigned long long init) {
 
 MyBigInt::MyBigInt(const MyBigInt& mbi_s) {
 	size = mbi_s.size;
-	if(digits) delete [] digits;
+	// ne desava se, jer jer je konstruktor
+	// if(digits) delete [] digits;
 	digits = new int_least8_t[size];
 	for(int i = 0; i < size; i++) {
 		digits[i] = mbi_s.digits[i];
@@ -87,7 +88,8 @@ MyBigInt::MyBigInt(const MyBigInt& mbi_s) {
 
 MyBigInt::MyBigInt(MyBigInt&& mbi_s) {
 	size = mbi_s.size;
-	if(digits) delete [] digits;
+	// ne desava se, jer jer je konstruktor
+	// if(digits) delete [] digits;
 	digits = mbi_s.digits;
 	mbi_s.digits = nullptr;
 	// std::cout << "Calling move\n";
