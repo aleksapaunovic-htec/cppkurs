@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <type_traits>
 #include <cassert>
 #include <vector>
@@ -16,6 +17,13 @@ auto sum(T t, Ts... args) {
 	return t + sum(args...);
 }
 */
+
+enum class Types {STRING, INTEGER, DOUBLE};
+std::unordered_map<char, Types> type_map {
+	{'d', Types::INTEGER},
+	{'f', Types::DOUBLE},
+	{'s', Types::STRING}
+};
 
 // should expand to (a + (b + (c + d))?
 template <typename... Ts>
@@ -36,28 +44,79 @@ auto min(T t, Ts... args) {
 	return t < others? t : others;
 }
 
-template <typename T, typename... Ts>
-int my_printf(const std::string format, const Ts&... args) {
-	std::string result = "";
-	int i;
+int my_printf(const std::string format, std::stringstream& result) {
+	int pos = format.find('%');
+	if(pos != std::string::npos) {
+		std::cout << "Invalid format\n";
+		return 1;
+	}
+
+	result << format;
+	
+	std::cout << result.str();
+
 	return 0;
 }
 
+template <typename T, typename... Ts>
+int my_printf(const std::string format, std::stringstream& result, const T& t, const Ts&... args) {
+	int pos = format.find('%');
+	if(pos == std::string::npos || pos == (format.length() - 1)) {
+		std::cout << "Invalid format\n";
+		return 1;
+	}
+
+	result << format.substr(0, pos);
+
+	pos++;
+	if(!type_map.count(format[pos])) {
+		std::cout << "Invalid format\n";
+		return 1;
+	}
+
+	bool error = false;
+
+
+	switch(type_map.at(format[pos])) {
+	case Types::STRING: 
+		if (!std::is_constructible<std::string, std::remove_reference_t<T>>::value) 
+			error = true;
+		break;
+	case Types::INTEGER:
+		if (!std::is_integral<std::remove_reference_t<T>>::value) 
+			error = true;
+		break;
+	case Types::DOUBLE:	
+		if (!std::is_floating_point<std::remove_reference_t<T>>::value) 
+			error = true;
+		break;
+	}
+
+	if(error) {
+		std::cout << "Invalid format\n";
+		return 1;
+	}
+
+	result << t;
+
+	return my_printf(format.substr(pos + 1, format.length() - pos), result, args...);
+}
+
+template <typename... Ts>
+int my_printf(const std::string format, const Ts&... args) {
+	std::stringstream s;
+	return my_printf(format, s, args...);
+}
+
 int my_printf(const std::string format) {
-	std::cout << format;
-	return 0;
+	std::stringstream s;
+	return my_printf(format, s);
 }
 
 // typechecking mora u runtime, za slucaj da korisnik prosledi format  
 // takodje, zbog std::string.
 template<typename... Ts>
 int myprintf_iter(const std::string format, const Ts&... args) {
-	enum class Types {STRING, INTEGER, DOUBLE};
-	std::unordered_map<char, Types> type_map {
-		{'d', Types::INTEGER},
-		{'f', Types::DOUBLE},
-		{'s', Types::STRING}
-	};
 	std::vector<Types> types;
 	// svakako cu morati da ih ubacim u string, mogu odmah da konvertujem u string
 	std::vector<std::string> arg_strings;
@@ -146,6 +205,15 @@ int main() {
 	// baca assert
 	// myprintf_iter("Some text %s, some floating point number %f again something %k\n", "45", 89.7, 56);
 	myprintf_iter("Some text %s, some floating point number %f again something %d\n", "45", 89.7, 56);
+	
+	// normalna implementacija
+	std::cout << std::endl << std::endl;
+
+	my_printf("Simple check\nNew line\nAgain new line\n");
+	my_printf(" text %s, integral value %d than something %d\n", "SUCCESSFULLY", 85);
+
+	my_printf("Some text %s, some floating point number %f again something %k\n", "45", 89.7, 56);
+	my_printf("Some text %s, some floating point number %f again something %d\n", "45", 89.7, 56);
 
 
 	return 0;
